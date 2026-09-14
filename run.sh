@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 if [[ ! -x .venv/bin/python ]]; then
-  python3 -m venv .venv
-  .venv/bin/pip install -r requirements.txt
+  uv venv
+  uv pip install -r requirements.txt
 fi
-.venv/bin/python generate_samples.py
-exec .venv/bin/uvicorn server:app --host 127.0.0.1 --port 8000
+uv run generate_samples.py
+exec uv run uvicorn server:app --host 127.0.0.1 --port 8000

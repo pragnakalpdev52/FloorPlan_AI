@@ -10,15 +10,22 @@ The client-facing flow is:
 
 ## Run
 
+This project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management.
+
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python generate_samples.py
-uvicorn server:app --host 127.0.0.1 --port 8000
+uv venv
+uv pip install -r requirements.txt
+uv run generate_samples.py
+uv run uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+Or just run:
+
+```bash
+./run.sh
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and sign in with the demo account: `demo` / `demo@9558`.
 
 ## Inference engine
 
