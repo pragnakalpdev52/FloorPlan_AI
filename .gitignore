@@ -1,0 +1,10 @@
+data/templates/
+data/samples/detected_*
+data/uploads/
+models/*
+.DS_Store
+.venv/
+.env
+test/
+
+

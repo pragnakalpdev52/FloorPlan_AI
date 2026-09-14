@@ -1,0 +1,25 @@
+<View>
+  <Image name="image" value="$image" zoom="true" zoomControl="true"/>
+  <RectangleLabels name="label" toName="image">
+    <Label value="door" background="#d94f4f"/>  <!-- Door -->
+    <Label value="double_door" background="#d94f4f"/>  <!-- Double Door -->
+    <Label value="sliding_door" background="#d94f4f"/>  <!-- Sliding Door -->
+    <Label value="window" background="#d94f4f"/>  <!-- Window -->
+    <Label value="bay_window" background="#d94f4f"/>  <!-- Bay Window -->
+    <Label value="bed" background="#4f8fd9"/>  <!-- Bed -->
+    <Label value="sofa" background="#4f8fd9"/>  <!-- Sofa -->
+    <Label value="chair" background="#4f8fd9"/>  <!-- Chair -->
+    <Label value="table" background="#4f8fd9"/>  <!-- Table -->
+    <Label value="dining_table" background="#4f8fd9"/>  <!-- Dining Table -->
+    <Label value="wardrobe" background="#4f8fd9"/>  <!-- Wardrobe -->
+    <Label value="bedside_cupboard" background="#4f8fd9"/>  <!-- Nightstand -->
+    <Label value="tv_cabinet" background="#4f8fd9"/>  <!-- TV Cabinet -->
+    <Label value="toilet" background="#4f8fd9"/>  <!-- Toilet -->
+    <Label value="sink" background="#4f8fd9"/>  <!-- Sink -->
+    <Label value="bathtub" background="#4f8fd9"/>  <!-- Bathtub -->
+    <Label value="shower" background="#4f8fd9"/>  <!-- Shower -->
+    <Label value="stove" background="#4f8fd9"/>  <!-- Stove -->
+    <Label value="refrigerator" background="#4f8fd9"/>  <!-- Refrigerator -->
+    <Label value="cabinet" background="#4f8fd9"/>  <!-- Cabinet -->
+  </RectangleLabels>
+</View>

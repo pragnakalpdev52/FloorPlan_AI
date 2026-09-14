@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Floor Plan Detection · Furniture Segmentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=13" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">FP</span>
+        <div>
+          <strong>FloorPlan AI</strong>
+          <span>2D furniture segmentation &amp; detection</span>
+        </div>
+      </div>
+      <div class="top-meta">
+        <span>Architecture · Interior · PropTech</span>
+        <span class="dot"></span>
+        <span>Live inference</span>
+        <span class="dot"></span>
+        <span id="current-user"></span>
+        <button id="logout-btn" class="ghost-btn" type="button">Log out</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">Computer vision for architectural drawings</p>
+      <h1>Upload floor plans. Review detections.</h1>
+      <p class="lede">
+        Drop one or many drawings. Switch between them in the queue, zoom to inspect boxes,
+        and compare original vs annotated output.
+      </p>
+    </section>
+
+    <section class="panel upload-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Upload floor plans</h2>
+          <p class="panel-copy">Select multiple images at once, or add more anytime. Samples are optional.</p>
+        </div>
+        <div id="queue-badge" class="active-file-badge" hidden></div>
+      </div>
+
+      <div class="upload-row">
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload floor plan images">
+          <input
+            id="file-input"
+            type="file"
+            accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+            multiple
+            hidden
+          />
+          <strong>Drop floor plans here</strong>
+          <span>PNG, JPG, or WEBP · multiple files supported</span>
+          <button id="browse-btn" class="primary-btn browse-btn" type="button">Browse files</button>
+          <em id="file-label">No files selected</em>
+        </div>
+        <div class="upload-cta">
+          <button id="detect-btn" class="primary-btn" type="button" disabled>
+            Run detection on queue
+          </button>
+          <button id="detect-active-btn" class="secondary-btn" type="button" disabled>
+            Run active only
+          </button>
+          <p class="hint" id="upload-hint">Add one or more floor plans to start.</p>
+        </div>
+      </div>
+
+      <div class="optional-samples">
+        <p class="panel-copy">Optional demo samples</p>
+        <div id="sample-list" class="sample-list sample-list-inline"></div>
+      </div>
+    </section>
+
+    <section class="panel queue-panel" id="queue-panel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>Image queue</h2>
+          <p class="panel-copy">Click a card to inspect it. Status shows pending, running, or done.</p>
+        </div>
+        <button id="clear-queue-btn" class="ghost-btn" type="button">Clear queue</button>
+      </div>
+      <div id="queue-list" class="queue-list"></div>
+    </section>
+
+    <section class="workspace" id="workspace" hidden>
+      <section class="panel viewer-panel">
+        <div class="panel-head">
+          <div>
+            <h2 id="active-title">Active plan</h2>
+            <p id="active-subtitle" class="panel-copy">Select an image from the queue.</p>
+          </div>
+          <div class="view-tabs" role="tablist">
+            <button type="button" class="view-tab" data-view="original">Original</button>
+            <button type="button" class="view-tab" data-view="annotated">Detected</button>
+            <button type="button" class="view-tab is-active" data-view="compare">Compare</button>
+          </div>
+        </div>
+
+        <div class="viewer-shell" id="viewer-shell">
+          <div class="viewer-pane" data-pane="original">
+            <div class="image-frame" data-frame="original">
+              <div class="image-scroll" data-scroll>
+                <img id="view-original" alt="Original floor plan" draggable="false" />
+              </div>
+              <div class="frame-empty" data-empty>No image yet</div>
+              <div class="frame-controls">
+                <button type="button" class="frame-btn" data-action="zoom-out" title="Zoom out">−</button>
+                <span class="frame-zoom" data-zoom-label>100%</span>
+                <button type="button" class="frame-btn" data-action="zoom-in" title="Zoom in">+</button>
+                <button type="button" class="frame-btn" data-action="fit" title="Fit to view">Fit</button>
+                <button type="button" class="frame-btn" data-action="expand" title="Open fullscreen">Fullscreen</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewer-pane" data-pane="annotated">
+            <div class="image-frame" data-frame="annotated">
+              <div class="image-scroll" data-scroll>
+                <img id="view-annotated" alt="Annotated floor plan detections" draggable="false" />
+              </div>
+              <div class="frame-empty" data-empty>Run detection to see overlay</div>
+              <div class="frame-controls">
+                <button type="button" class="frame-btn" data-action="zoom-out" title="Zoom out">−</button>
+                <span class="frame-zoom" data-zoom-label>100%</span>
+                <button type="button" class="frame-btn" data-action="zoom-in" title="Zoom in">+</button>
+                <button type="button" class="frame-btn" data-action="fit" title="Fit to view">Fit</button>
+                <button type="button" class="frame-btn" data-action="expand" title="Open fullscreen">Fullscreen</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewer-pane is-active" data-pane="compare">
+            <div class="compare-grid">
+              <div class="image-frame" data-frame="compare-original">
+                <div class="image-scroll" data-scroll>
+                  <img id="view-compare-original" alt="Original for comparison" draggable="false" />
+                </div>
+                <div class="frame-empty" data-empty>Original</div>
+                <div class="frame-controls compact">
+                  <button type="button" class="frame-btn" data-action="zoom-out">−</button>
+                  <span class="frame-zoom" data-zoom-label>100%</span>
+                  <button type="button" class="frame-btn" data-action="zoom-in">+</button>
+                  <button type="button" class="frame-btn" data-action="fit">Fit</button>
+                  <button type="button" class="frame-btn" data-action="expand">Fullscreen</button>
+                </div>
+              </div>
+              <div class="image-frame" data-frame="compare-annotated">
+                <div class="image-scroll" data-scroll>
+                  <img id="view-compare-annotated" alt="Annotated for comparison" draggable="false" />
+                </div>
+                <div class="frame-empty" data-empty>Detected</div>
+                <div class="frame-controls compact">
+                  <button type="button" class="frame-btn" data-action="zoom-out">−</button>
+                  <span class="frame-zoom" data-zoom-label>100%</span>
+                  <button type="button" class="frame-btn" data-action="zoom-in">+</button>
+                  <button type="button" class="frame-btn" data-action="fit">Fit</button>
+                  <button type="button" class="frame-btn" data-action="expand">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel results-panel" id="results-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Detection details</h2>
+            <p class="panel-copy" id="results-copy">Select a completed job to review inventory and rooms.</p>
+          </div>
+          <div class="stat-pills" id="stat-pills"></div>
+        </div>
+
+        <div class="results-grid">
+          <div>
+            <h3>Inventory</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Class</th>
+                  <th>Confidence</th>
+                  <th>Source</th>
+                  <th>Bounding box</th>
+                </tr>
+                </thead>
+                <tbody id="inventory-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3>Rooms &amp; counts</h3>
+            <div id="room-cards" class="room-cards"></div>
+            <div id="class-counts" class="class-counts"></div>
+          </div>
+        </div>
+
+        <details class="json-block">
+          <summary>Structured JSON output</summary>
+          <pre id="json-output"></pre>
+        </details>
+      </section>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="overlay-card">
+      <div class="spinner"></div>
+      <h2>Running inference</h2>
+      <p id="overlay-status">Processing images…</p>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
+    <div class="lightbox-meta">
+      <strong id="lightbox-title">Fullscreen</strong>
+      <span id="lightbox-zoom-level">100%</span>
+    </div>
+    <div class="lightbox-stage" id="lightbox-stage">
+      <img id="lightbox-image" alt="Expanded floor plan view" draggable="false" />
+    </div>
+    <div class="lightbox-controls">
+      <button type="button" class="frame-btn" id="lightbox-zoom-out">−</button>
+      <button type="button" class="frame-btn" id="lightbox-zoom-in">+</button>
+      <button type="button" class="frame-btn" id="lightbox-zoom-reset">Fit</button>
+    </div>
+    <p class="lightbox-hint">Ctrl/Cmd + scroll to zoom · normal scroll to pan · Esc to close · double-click to toggle 200%</p>
+  </div>
+
+  <script src="/static/app.js?v=13"></script>
+</body>
+</html>

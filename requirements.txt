@@ -1,0 +1,12 @@
+fastapi==0.141.1
+uvicorn==0.52.4
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+numpy==2.2.6
+python-multipart==0.0.32
+itsdangerous==2.2.0
+torch
+torchvision
+python-dotenv==1.1.1
+inference-sdk==1.6.0
+ultralytics
